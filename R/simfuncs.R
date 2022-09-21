@@ -2,11 +2,11 @@
 generateMultiorange = function(n, p = 2, seed = 1, with_noise = TRUE, noise_p = 1)
 {
   set.seed(seed)
-  X = matrix(nrow = n, ncol = p)
-  y = numeric(n)
   nclass = numeric(3)
   each_n = floor(n / 3)
   n = each_n * 3
+  X = matrix(nrow = n, ncol = p)
+  y = numeric(n)
   k = 1
   while (k <= n) {
     x = rnorm(p, sd = 2)
@@ -41,11 +41,11 @@ generateMultiorange = function(n, p = 2, seed = 1, with_noise = TRUE, noise_p = 
 generateTwoorange = function(n, p = 2, seed = 1, with_noise = TRUE, noise_p = 1)
 {
   set.seed(seed)
-  X = matrix(nrow = n, ncol = p)
-  y = numeric(n)
   nclass = numeric(2)
   each_n = floor(n / 2)
   n = each_n * 2
+  X = matrix(nrow = n, ncol = p)
+  y = numeric(n)
   k = 1
   while (k <= n) {
     x = rnorm(p, sd = 2)
