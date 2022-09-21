@@ -6,6 +6,7 @@ generateMultiorange = function(n, p = 2, seed = 1, with_noise = TRUE, noise_p = 
   y = numeric(n)
   nclass = numeric(3)
   each_n = floor(n / 3)
+  n = each_n * 3
   k = 1
   while (k <= n) {
     x = rnorm(p, sd = 2)
@@ -44,6 +45,7 @@ generateTwoorange = function(n, p = 2, seed = 1, with_noise = TRUE, noise_p = 1)
   y = numeric(n)
   nclass = numeric(2)
   each_n = floor(n / 2)
+  n = each_n * 2
   k = 1
   while (k <= n) {
     x = rnorm(p, sd = 2)
