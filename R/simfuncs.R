@@ -23,7 +23,7 @@ generateMultiorange = function(n, p = 2, seed = 1, with_noise = TRUE, noise_p = 
       X[k, ] = x
       k = k + 1
     }
-    else if (5 < sx & sx <= 7 & nclass[3] < each_n) {
+    else if (6 < sx & sx <= 7 & nclass[3] < each_n) {
       nclass[3] = nclass[3] + 1
       y[k] = 3
       X[k, ] = x
