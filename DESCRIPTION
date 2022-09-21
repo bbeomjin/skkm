@@ -1,0 +1,11 @@
+Package: skkm
+Title: Sparse Kernel k-Means Clustering
+Version: 0.0.0.9000
+Authors@R: 
+    person("Beomjin", "Park", , "bbbeomjin@gmail.com", role = c("aut", "cre"))
+Description: Fitting Sparse Kernel k-Means Clustering.
+Imports: parallel
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.0
