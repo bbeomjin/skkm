@@ -163,9 +163,9 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
     init_clusters_list = vector("list", nInit)
     for (i in 1:nInit) {
       clusters0 = sample(1:nCluster, size = n, replace = TRUE)
-      init_clusters_list[[i]] = clusters0
       clusters = updateCs(anovaKernel = anovaKernel, theta = theta0, 
                           clusters = clusters0, weights = weights)$clusters
+      init_clusters_list[[i]] = clusters
       wcd = GetWCD(anovaKernel, clusters = clusters, weights = weights)
       init_wcd_vec[i] = sum(theta0 * wcd)
     }
