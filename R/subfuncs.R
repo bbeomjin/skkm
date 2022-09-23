@@ -65,7 +65,7 @@ make_anovaKernel = function(x, y, kernel, kparam)
       kernelCoord[[index]] = paste("x", d, " smooth", sep="")
     }
     
-  } else if (kernel == 'spline2') {
+  } else if (kernel == 'spline-2way') {
     numK = (2 * dimx) + (2 * dimx * (2 * dimx - 1) / 2 - dimx)
     anova_kernel = vector(mode = "list", numK)
     kernelCoord = vector(mode = "list", numK)

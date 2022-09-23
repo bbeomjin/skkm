@@ -139,7 +139,7 @@ skkm = function(x, nCluster, nStart = 10, s = 1.5, weights = NULL,
 }
 
 skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weights = NULL,
-               kernel = "linear", kparam = 1, maxiter = 100, eps = 1e-5) 
+               kernel = "linear", kparam = 1, maxiter = 100, eps = 1e-8) 
 {
   call = match.call()
   n = nrow(x)
@@ -180,9 +180,7 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
     
     # Update clusters
     clusters = updateCs(anovaKernel = anovaKernel, theta = theta0, 
-                        clusters = clusters0, weights = weights)$clusters
-    
-    
+                        clusters = clusters0, weights = weights)$clusters  
     # plot(dat$x[, 1:2], col = clusters)
     
     # Update theta
