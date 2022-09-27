@@ -188,7 +188,10 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
     td = GetWCD(anovaKernel, rep(1, length(clusters)), weights = weights)
     bcd = td - wcd
     
-    delta = BinarySearch(coefs = bcd, s = s)
+    terror = try({delta = ExactSearch(coefs = bcd, s = s)}, silent = TRUE)
+    if (inherits(terror, "try-error")) {
+      delta = BinarySearch(coefs = bcd, s = s)  
+    }
     
     theta_tmp = soft_threshold(bcd, delta = delta)
     theta = normalization(theta_tmp)
