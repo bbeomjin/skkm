@@ -6,13 +6,13 @@
 #' @return s tuning parameter
 #' @export 
 tune.skkm = function(x, nCluster, nPerms = 20, s = NULL, ns = 100, nStart = 10, weights = NULL, 
-                     kernel = "linear", kparam = 1, opt = TRUE, nCores = 1, ...)
+                     kernel = "linear", kparam = 1, search = "exact", opt = TRUE, nCores = 1, ...)
 {
   out = list()
   call = match.call()
   kernel = match.arg(kernel, c("linear", "gaussian", "spline-t",
                                "gaussian-2way", "spline-t-2way"))
-  
+  search = match.arg(search, c("exact", "binary"))
   if (!is.matrix(x)) {
     x = as.matrix(x)
   }
@@ -88,13 +88,13 @@ tune.skkm = function(x, nCluster, nPerms = 20, s = NULL, ns = 100, nStart = 10, 
 #' @return out list of clusters
 #' @export 
 skkm = function(x, nCluster, nStart = 10, s = 1.5, weights = NULL,
-               kernel = "linear", kparam = 1, opt = TRUE, ...) 
+               kernel = "linear", kparam = 1, search = "exact", opt = TRUE, ...) 
 {
   out = list()
   call = match.call()
   kernel = match.arg(kernel, c("linear", "gaussian", "spline-t",
                                "gaussian-2way", "spline-t-2way"))
-  
+  search = match.arg(search, c("exact", "binary"))
   x = as.matrix(x)
   n = nrow(x)
   # p = ncol(x)
@@ -117,7 +117,7 @@ skkm = function(x, nCluster, nStart = 10, s = 1.5, weights = NULL,
     # clusters0 = fit@.Data
     
     res[[j]] = skkm_core(x = x, clusters = nCluster, theta = NULL, s = s, weights = weights,
-                         kernel = kernel, kparam = kparam, ...)
+                         kernel = kernel, kparam = kparam, search = search, ...)
   }
   if (opt) {
     bcd_list = sapply(res, function(x) {
@@ -139,7 +139,7 @@ skkm = function(x, nCluster, nStart = 10, s = 1.5, weights = NULL,
 }
 
 skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weights = NULL,
-               kernel = "linear", kparam = 1, maxiter = 100, eps = 1e-8) 
+               kernel = "linear", kparam = 1, search = "exact", maxiter = 100, eps = 1e-8) 
 {
   call = match.call()
   n = nrow(x)
@@ -188,10 +188,15 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
     td = GetWCD(anovaKernel, rep(1, length(clusters)), weights = weights)
     bcd = td - wcd
     
-    terror = try({delta = ExactSearch(coefs = bcd, s = s)}, silent = TRUE)
-    if (inherits(terror, "try-error")) {
-      delta = BinarySearch(coefs = bcd, s = s)  
+    if (search == "exact") {
+      terror = try({delta = ExactSearch(coefs = bcd, s = s)}, silent = TRUE)
+      if (inherits(terror, "try-error")) {
+        delta = BinarySearch(coefs = bcd, s = s)  
+      }  
+    } else {
+      delta = BinarySearch(coefs = bcd, s = s)
     }
+    
     
     theta_tmp = soft_threshold(bcd, delta = delta)
     theta = normalization(theta_tmp)
