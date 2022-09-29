@@ -13,7 +13,7 @@ generateSmiley = function(n, p = 2, seed = 1, with_noise = TRUE, noise_p = 1)
   x3 = cbind(3 * cos(seq_x) + rnorm(each_n) * sigma, 2 * sin(seq_x) + 0.0 + rnorm(each_n) * sigma)
 
   X = rbind(x1, x2, x3)
-
+  y = rep(c(1, 2, 3), each = each_n)
   if (with_noise) {
     noise_dat = matrix(rnorm(n * noise_p, sd = 2), n, noise_p)
     X = cbind(X, noise_dat)
