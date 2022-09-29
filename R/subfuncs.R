@@ -344,6 +344,22 @@ BinarySearch = function(coefs, s)
   return((lamb1 + lamb2) / 2)
 }
 
+
+#
+ExactSearch = function(coefs, s)
+{
+  p = length(coefs)
+  sorted_coefs = sort(coefs, decreasing = TRUE)
+  lambda_vec = numeric(p)
+  for (i in 1:p) {
+    sub_coefs = coefs[1:i]
+    ft = sum(sub_coefs) / i
+    st = (1 / sqrt(i)) * sqrt(sum(sub_coefs)^2 / i - (sum(sub_coefs)^2 - sum(sub_coefs^2) * s^2) / (i - s^2))
+    lambda_vec[i] = min(ft + st, ft - st)
+  }
+  return(min(lambda_vec, na.rm = TRUE))
+}
+
 # BinarySearch <- function(argu,sumabs){
 #   if(l2n(argu)==0 || sum(abs(argu/l2n(argu)))<=sumabs) return(0)
 #   lam1 <- 0
