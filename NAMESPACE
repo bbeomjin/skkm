@@ -2,6 +2,7 @@
 
 export(generateMultiMoon)
 export(generateMultiorange)
+export(generateSmiley)
 export(generateTaegeuk)
 export(generateTwoMoon)
 export(generateTwoorange)

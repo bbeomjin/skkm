@@ -1,4 +1,28 @@
 #' @export 
+generateSmiley = function(n, p = 2, seed = 1, with_noise = TRUE, noise_p = 1)
+{
+  set.seed(seed)
+  nclass = 3
+  each_n = floor(n / nclass)
+  sigma = 0.1
+  x1 = matrix(rnorm(each_n * p, c(-1, -0.5), 0.2),
+            nrow = each_n, ncol = p, byrow = TRUE)
+  x2 = matrix(rnorm(each_n * p, c(1, -0.5), 0.2),
+              nrow = each_n, ncol = p, byrow = TRUE)
+  seq_x = runif(each_n, pi, 2 * pi)
+  x3 = cbind(3 * cos(seq_x) + rnorm(each_n) * sigma, 2 * sin(seq_x) + 0.0 + rnorm(each_n) * sigma)
+
+  X = rbind(x1, x2, x3)
+
+  if (with_noise) {
+    noise_dat = matrix(rnorm(n * noise_p, sd = 2), n, noise_p)
+    X = cbind(X, noise_dat)
+  }
+  return(list(x = X, y = y))
+}
+
+
+#' @export 
 generateTaegeuk = function(n, p = 2, seed = 1, with_noise = TRUE, noise_p = 1)
 {
   set.seed(seed)
