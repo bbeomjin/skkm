@@ -21,4 +21,10 @@ Sparse Kernel k-Means Clustering
 
 - ```tune.skkm``` : A function for tuning the hyper-parameter of the sparse kernel k-means clustering.
 
-- ```skkm``` : A function to execute the sparse kernel k-means algorithm.
+- ```skkm``` : A function to execute the sparse kernel k-means clustering.
+
+- ```tune.kkmeans``` : A function for tuuing the kernel parameter of kernel k-means clustering.
+
+- ```kkmeans``` : A function to perform the kernel k-means clustering.
+
+## 3. Examples
