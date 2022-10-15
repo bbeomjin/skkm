@@ -49,8 +49,9 @@ tuned_skkm = tune.skkm(x = dat$x, nCluster = nclusters, s = NULL, ns = 20, nPerm
 # Tuning parameters for the Sparse kernel k-means clustering with the binary search
 # Does not excecute
 # tuned_skkm = tune.skkm(x = dat$x, nCluster = nclusters, s = NULL, ns = 20, nPerms = 25,
-                         nStart = 1, kernel = "gaussian-2way", kparam = sigma, search = "binary", 
-                       opt = TRUE, nInit = 20, nCores = 20)
+#                        nStart = 1, kernel = "gaussian-2way", kparam = sigma, search = "binary", 
+#                        opt = TRUE, nInit = 20, nCores = 20)
+
 skkm_clusters = tuned_skkm$optModel$optClusters
 ari_skkm = adj.rand.index(dat$y, skkm_clusters)
 ```
