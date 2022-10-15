@@ -12,6 +12,7 @@ skkm(
   weights = NULL,
   kernel = "linear",
   kparam = 1,
+  search = "exact",
   opt = TRUE,
   ...
 )
@@ -23,5 +24,5 @@ skkm(
 out list of clusters
 }
 \description{
-fit skkm
+fitting skkm
 }
