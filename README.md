@@ -28,3 +28,29 @@ Sparse Kernel k-Means Clustering
 - ```kkmeans``` : A function to perform the kernel k-means clustering.
 
 ## 3. Examples
+```{r}
+require(fossil)
+
+# Generate the simulated data through the Smiley scenario
+n = 100
+p = 2
+dat = generateSmiley(n = n, p = p, seed = 1, with_noise = TRUE, noise_p = 5)
+
+# Grid for the Gaussian kernel parameter
+sigma = c(0.25, 0.5, 0.75, 1)
+
+# Tuning parameters for the Sparse kernel k-means clustering with the exact search
+# The nCores argument only works on Linux
+# For Windows, set nCores = 1 
+tuned_skkm = tune.skkm(x = dat$x, nCluster = nclusters, s = NULL, ns = 20, nPerms = 25,
+                       nStart = 1, kernel = "gaussian-2way", kparam = sigma, search = "exact", 
+                       opt = TRUE, nInit = 20, nCores = 20)
+
+# Tuning parameters for the Sparse kernel k-means clustering with the binary search
+# Does not excecute
+# tuned_skkm = tune.skkm(x = dat$x, nCluster = nclusters, s = NULL, ns = 20, nPerms = 25,
+                         nStart = 1, kernel = "gaussian-2way", kparam = sigma, search = "binary", 
+                       opt = TRUE, nInit = 20, nCores = 20)
+skkm_clusters = tuned_skkm$optModel$optClusters
+ari_skkm = adj.rand.index(dat$y, skkm_clusters)
+```
