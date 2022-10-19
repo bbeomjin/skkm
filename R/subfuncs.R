@@ -353,7 +353,7 @@ ExactSearch = function(coefs, s)
   sorted_coefs = sort(coefs, decreasing = TRUE)
   lambda_vec = rep(NA, p)
   for (i in ind_seq) {
-    sub_coefs = coefs[1:i]
+    sub_coefs = sorted_coefs[1:i]
     coefs_sum = sum(sub_coefs)
     squared_sum = sum(sub_coefs^2)
     ft = coefs_sum / i
