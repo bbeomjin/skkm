@@ -207,6 +207,7 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
     if (search == "exact") {
       suppressWarnings({delta = ExactSearch(coefs = bcd, s = s)})
       if (delta == Inf) {
+        warning("The exact search couldn't find a solution. Use the binary search.")
         delta = BinarySearch(coefs = bcd, s = s)  
       }  
     } else {
