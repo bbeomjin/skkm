@@ -39,7 +39,7 @@ tune.skkm = function(x, nCluster, nPerms = 20, s = NULL, ns = 100, nStart = 10, 
     
   org_bcd = unlist(parallel::mclapply(1:nrow(params), FUN = function(j) {
     org_fit = skkm(x = x, nCluster = nCluster, nStart = nStart, s = params$s[j], weights = weights,
-                   kernel = kernel, kparam = params$kparam[j], opt = TRUE, ...)
+                   kernel = kernel, kparam = params$kparam[j], search = search, opt = TRUE, ...)
     return(org_fit$maxBcd)
   }, mc.cores = nCores))
   
@@ -54,7 +54,7 @@ tune.skkm = function(x, nCluster, nPerms = 20, s = NULL, ns = 100, nStart = 10, 
   for (b in 1:nPerms) {
     perm_bcd = unlist(parallel::mclapply(1:nrow(params), FUN = function(j) {
       perm_fit = skkm(x = perm_list[[b]], nCluster = nCluster, nStart = nStart, s = params$s[j], weights = weights,
-                      kernel = kernel, kparam = params$kparam[j], opt = TRUE, ...)
+                      kernel = kernel, kparam = params$kparam[j], search = search, opt = TRUE, ...)
       return(perm_fit$maxBcd)
     }, mc.cores = nCores))
    
@@ -82,7 +82,7 @@ tune.skkm = function(x, nCluster, nPerms = 20, s = NULL, ns = 100, nStart = 10, 
     
   if (opt) {
     opt_fit = skkm(x = x, nCluster = nCluster, nStart = nStart, s = out$opt_s, weights = weights,
-                  kernel = kernel, kparam = out$opt_kparam, opt = TRUE, ...)  
+                  kernel = kernel, kparam = out$opt_kparam, search = search, opt = TRUE, ...)  
     out$optModel = opt_fit
   }
   
