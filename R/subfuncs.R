@@ -344,14 +344,14 @@ BinarySearch = function(coefs, s)
   return((lamb1 + lamb2) / 2)
 }
 
-#
+# exact search
 ExactSearch = function(coefs, s)
 {
   if((sum(coefs^2) == 0) | (sum(abs(normalization(coefs))) <= s)) return(0)
   p = length(coefs)
   ind_seq = (1:p)[1:p != s^2]
   sorted_coefs = sort(coefs, decreasing = TRUE)
-  lambda_vec = rep(NA, p)
+  lambda_vec = c()
   for (i in ind_seq) {
     sub_coefs = sorted_coefs[1:i]
     coefs_sum = sum(sub_coefs)
@@ -360,16 +360,47 @@ ExactSearch = function(coefs, s)
     st_tmp = coefs_sum^2 / i - (coefs_sum^2 - squared_sum * s^2) / (i - s^2)
     if (st_tmp < 0) {warning("The value in square root is negative"); next}
     st = (1 / sqrt(i)) * sqrt(st_tmp)
-    lambda = min(ft + st, ft - st)
-    if ((sorted_coefs[i] > lambda) & (lambda > c(sorted_coefs, 0)[i + 1])) {
-        lambda_vec[i] = lambda
+    lambda1 = ft + st; lambda2 = ft - st
+    if (((lambda1 + 1e-8) > sorted_coefs[i]) | (lambda1 < (c(sorted_coefs, 0)[i + 1] + 1e-8))) {
+        lambda1 = NA
     }
+    if (((lambda2 + 1e-8) > sorted_coefs[i]) | (lambda2 < (c(sorted_coefs, 0)[i + 1] + 1e-8))) {
+        lambda2 = NA
+    }
+    lambda_vec = c(lambda_vec, c(lambda1, lambda2))
   }
   return(min(lambda_vec, na.rm = TRUE))
 }
 
 
-# Old version
+
+
+# old version2
+# ExactSearch = function(coefs, s)
+# {
+#   if((sum(coefs^2) == 0) | (sum(abs(normalization(coefs))) <= s)) return(0)
+#   p = length(coefs)
+#   ind_seq = (1:p)[1:p != s^2]
+#   sorted_coefs = sort(coefs, decreasing = TRUE)
+#   lambda_vec = rep(NA, p)
+#   for (i in ind_seq) {
+#     sub_coefs = sorted_coefs[1:i]
+#     coefs_sum = sum(sub_coefs)
+#     squared_sum = sum(sub_coefs^2)
+#     ft = coefs_sum / i
+#     st_tmp = coefs_sum^2 / i - (coefs_sum^2 - squared_sum * s^2) / (i - s^2)
+#     if (st_tmp < 0) {warning("The value in square root is negative"); next}
+#     st = (1 / sqrt(i)) * sqrt(st_tmp)
+#     lambda = min(ft + st, ft - st)
+#     if ((sorted_coefs[i] > lambda) & (lambda > c(sorted_coefs, 0)[i + 1])) {
+#         lambda_vec[i] = lambda
+#     }
+#   }
+#   return(min(lambda_vec, na.rm = TRUE))
+# }
+
+
+# old version
 # ExactSearch = function(coefs, s)
 # {
 #   if((sum(coefs^2) == 0) | (sum(abs(normalization(coefs))) <= s)) return(0)
