@@ -328,6 +328,7 @@ normalization = function(x) {
 BinarySearch = function(coefs, s) 
 {
   if((sum(coefs^2) == 0) | (sum(abs(normalization(coefs))) <= s)) return(0)
+  if (s == 1) {return(max(coefs) - 1e-8)}
   lamb1 = 0
   lamb2 = max(abs(coefs)) - 1e-6
   iter = 0
@@ -347,11 +348,12 @@ BinarySearch = function(coefs, s)
 # exact search
 ExactSearch = function(coefs, s)
 {
-  if((sum(coefs^2) == 0) | (sum(abs(normalization(coefs))) <= s)) return(0)
+  if ((sum(coefs^2) == 0) | (sum(abs(normalization(coefs))) <= s)) return(0)
+  if (s == 1) {return(max(coefs) - 1e-8)}
   p = length(coefs)
   ind_seq = (1:p)[1:p != s^2]
   sorted_coefs = sort(coefs, decreasing = TRUE)
-  lambda_vec = c()
+  lambda_vec = rep(NA, p)
   for (i in ind_seq) {
     sub_coefs = sorted_coefs[1:i]
     coefs_sum = sum(sub_coefs)
@@ -360,14 +362,19 @@ ExactSearch = function(coefs, s)
     st_tmp = coefs_sum^2 / i - (coefs_sum^2 - squared_sum * s^2) / (i - s^2)
     if (st_tmp < 0) {warning("The value in square root is negative"); next}
     st = (1 / sqrt(i)) * sqrt(st_tmp)
-    lambda1 = ft + st; lambda2 = ft - st
-    if (((lambda1 + 1e-8) > sorted_coefs[i]) | (lambda1 < (c(sorted_coefs, 0)[i + 1] + 1e-8))) {
-        lambda1 = NA
+    # lambda1 = ft + st; lambda2 = ft - st
+    # if (((lambda1 + 1e-8) > sorted_coefs[i]) | (lambda1 < (c(sorted_coefs, 0)[i + 1] + 1e-8))) {
+    #     lambda1 = NA
+    # }
+    # if (((lambda2 + 1e-8) > sorted_coefs[i]) | (lambda2 < (c(sorted_coefs, 0)[i + 1] + 1e-8))) {
+    #     lambda2 = NA
+    # }
+    # lambda_vec = c(lambda_vec, c(lambda1, lambda2))
+    lambda = ft - st
+    if (((lambda + 1e-8) > sorted_coefs[i]) | (lambda < (c(sorted_coefs, 0)[i + 1] + 1e-8))) {
+        lambda = NA
     }
-    if (((lambda2 + 1e-8) > sorted_coefs[i]) | (lambda2 < (c(sorted_coefs, 0)[i + 1] + 1e-8))) {
-        lambda2 = NA
-    }
-    lambda_vec = c(lambda_vec, c(lambda1, lambda2))
+    lambda_vec[i] = lambda
   }
   return(min(lambda_vec, na.rm = TRUE))
 }
