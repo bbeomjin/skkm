@@ -1,15 +1,15 @@
 #' @export 
-generateThreeNormal = function(n, p = 2, seed = 1, with_noise = TRUE, noise_p = 1, noise_sd = 1)
+generateThreeNormal = function(n, p = 2, seed = 1, with_noise = TRUE, noise_p = 1, noise_sd = 2)
 {
   set.seed(seed)
   nclass = 3
   each_n = floor(n / nclass)
   n = each_n * nclass
-  x1 = matrix(rnorm(each_n * p, c(0, -2), 1),
+  x1 = matrix(rnorm(each_n * p, c(0, -1.5), 0.5),
             nrow = each_n, ncol = p, byrow = TRUE)
-  x2 = matrix(rnorm(each_n * p, c(2, 2), 1),
+  x2 = matrix(rnorm(each_n * p, c(1.5, 1.5), 0.5),
               nrow = each_n, ncol = p, byrow = TRUE)
-  x3 = matrix(rnorm(each_n * p, c(-2, 2), 1),
+  x3 = matrix(rnorm(each_n * p, c(-1.5, 1.5), 0.5),
               nrow = each_n, ncol = p, byrow = TRUE)
 
   X = rbind(x1, x2, x3)
@@ -32,12 +32,12 @@ generateSmiley = function(n, p = 2, seed = 1, with_noise = TRUE, noise_p = 1, no
   each_n = floor(n / nclass)
   n = each_n * nclass
   sigma = 0.1
-  x1 = matrix(rnorm(each_n * p, c(-1, -0.5), 0.2),
+  x1 = matrix(rnorm(each_n * p, c(-0.8, -0.5), 0.2),
             nrow = each_n, ncol = p, byrow = TRUE)
-  x2 = matrix(rnorm(each_n * p, c(1, -0.5), 0.2),
+  x2 = matrix(rnorm(each_n * p, c(0.8, -0.5), 0.2),
               nrow = each_n, ncol = p, byrow = TRUE)
   seq_x = runif(each_n, pi, 2 * pi)
-  x3 = cbind(3 * cos(seq_x) + rnorm(each_n) * sigma, 2 * sin(seq_x) + 0.0 + rnorm(each_n) * sigma)
+  x3 = cbind(2 * cos(seq_x) + rnorm(each_n) * sigma, 3.5 * sin(seq_x) + 0.0 + rnorm(each_n) * sigma)
 
   X = rbind(x1, x2, x3)
   y = rep(c(1, 2, 3), each = each_n)
@@ -47,6 +47,29 @@ generateSmiley = function(n, p = 2, seed = 1, with_noise = TRUE, noise_p = 1, no
   }
   return(list(x = X, y = y))
 }
+
+# generateSmiley = function(n, p = 2, seed = 1, with_noise = TRUE, noise_p = 1, noise_sd = 2)
+# {
+#   set.seed(seed)
+#   nclass = 3
+#   each_n = floor(n / nclass)
+#   n = each_n * nclass
+#   sigma = 0.1
+#   x1 = matrix(rnorm(each_n * p, c(-1, -0.5), 0.2),
+#             nrow = each_n, ncol = p, byrow = TRUE)
+#   x2 = matrix(rnorm(each_n * p, c(1, -0.5), 0.2),
+#               nrow = each_n, ncol = p, byrow = TRUE)
+#   seq_x = runif(each_n, pi, 2 * pi)
+#   x3 = cbind(3 * cos(seq_x) + rnorm(each_n) * sigma, 2 * sin(seq_x) + 0.0 + rnorm(each_n) * sigma)
+
+#   X = rbind(x1, x2, x3)
+#   y = rep(c(1, 2, 3), each = each_n)
+#   if (with_noise) {
+#     noise_dat = matrix(rnorm(n * noise_p, sd = noise_sd), n, noise_p)
+#     X = cbind(X, noise_dat)
+#   }
+#   return(list(x = X, y = y))
+# }
 
 
 #' @export 
