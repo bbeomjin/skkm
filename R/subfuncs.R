@@ -37,8 +37,70 @@ kernelMatrix = function(x, y, kernel = "gaussian", kparam = 1.0) {
   return(K)
 }
 
-make_anovaKernel = function(x, y, kernel, kparam)
+
+anovaKernel.gaussian = function(x, y, kernel, kparam)
 {
+  kernel = match.arg(kernel, c("gaussian", "gaussian-2way", 
+                               "scaled-gaussian", "scaled-gaussian-2way"))
+  x = as.matrix(x)
+  y = as.matrix(y)
+  dimx = ncol(x)
+  n = nrow(x)
+
+  wtx = wty = matrix(rep(0, n), nrow = n, ncol = dimx)
+  if (grepl("scaled", kernel)) {
+    wtx = sapply(1:dimx, function(j) {
+      rowSums(x[, -j, drop = FALSE]^2)
+    })
+    wty = sapply(1:dimx, function(j) {
+      rowSums(y[, -j, drop = FALSE]^2)
+    })
+  }
+
+  anovaKernel = lapply(1:dimx, function(j) {
+                        K = kernelMatrix(x[, j, drop = FALSE], y[, j, drop = FALSE], 
+                                        kernel = "gaussian", kparam = kparam)
+                        wt = exp(-kparam * outer(wtx[, j], wty[, j], "+"))
+                        return(wt * K)
+                      })
+  names(anovaKernel) = paste0("x", 1:dimx)
+  numK = dimx
+  
+  if (grepl("2way", kernel)) {
+
+    twt = matrix(0, n, n)
+    if (grepl("scaled", kernel)) {
+      twt = outer(rowSums(x^2), rowSums(y^2), "+")
+    }
+    
+    nint = dimx * (dimx - 1) / 2
+    anovaKernel_int = vector(mode = "list", nint)
+    index = 0
+    for (i in 1:(dimx - 1)) {
+      for (j in (i + 1):dimx) {
+        index = index + 1
+        A = anovaKernel[[i]]
+        B = anovaKernel[[j]]
+        anovaKernel_int[[index]] = A * B / exp(-kparam * twt)
+      }
+    }
+    comb_name = combn(names(anovaKernel), 2)
+    names(anovaKernel_int) = apply(comb_name, 2, paste0, collapse = "")
+    anovaKernel = c(anovaKernel, anovaKernel_int)    
+    numK = numK + nint
+  }
+  out = list()
+  out$K = anovaKernel
+  out$numK = numK
+  return(out)
+}
+
+
+anovaKernel.others = function(x, y, kernel, kparam)
+{
+  kernel = match.arg(kernel, c("linear", "gaussian", "spline", "spline-t",
+                               "gaussian-2way", "spline-2way", "spline-t-2way", 
+                               "scaled-gaussian", "scaled-gaussian-2way"))
   x = as.matrix(x)
   y = as.matrix(y)
   dimx = ncol(x)
