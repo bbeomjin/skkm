@@ -35,7 +35,7 @@ tune.skkm = function(x, nCluster, nPerms = 20, s = NULL, ns = 100, nStart = 10, 
 
   perm_list = vector("list", nPerms)
   for (i in 1:nPerms) {
-    perm_list[[i]] = sapply(1:p, function(j) sample(x[, j]))
+    perm_list[[i]] = sapply(1:p, function(j) sample(x[, j, drop = FALSE]))
   }
     
   org_bcd = unlist(parallel::mclapply(1:nrow(params), FUN = function(j) {

@@ -18,7 +18,7 @@ tune.kkmeans = function(x, nCluster, nPerms = 20, nStart = 10, weights = NULL,
 
   perm_list = vector("list", nPerms)
   for (i in 1:nPerms) {
-    perm_list[[i]] = sapply(1:p, function(j) sample(x[, j]))
+    perm_list[[i]] = sapply(1:p, function(j) sample(x[, j, drop = FALSE]))
   }
 
   org_bcd = unlist(parallel::mclapply(1:length(kparam), FUN = function(j) {
