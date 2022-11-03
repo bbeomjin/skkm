@@ -10,9 +10,8 @@ tune.skkm = function(x, nCluster, nPerms = 20, s = NULL, ns = 100, nStart = 10, 
 {
   out = list()
   call = match.call()
-  kernel = match.arg(kernel, c("linear", "gaussian", "spline", "spline-t",
-                               "gaussian-2way", "spline-2way", "spline-t-2way", 
-                               "scaled-gaussian", "scaled-gaussian-2way"))
+  kernel = match.arg(kernel, c("linear", "poly", "gaussian", "spline", "spline-t",
+                               "gaussian-2way", "spline-2way", "spline-t-2way"))
   search = match.arg(search, c("exact", "binary"))
   if (!is.matrix(x)) {
     x = as.matrix(x)
@@ -21,7 +20,7 @@ tune.skkm = function(x, nCluster, nPerms = 20, s = NULL, ns = 100, nStart = 10, 
   p = ncol(x)
   
   if (is.null(s)) {
-    if (kernel %in% c("gaussian-2way", "spline-t-2way")) {
+    if (grepl("2way", kernel)) {
       nv = p + p * (p - 1) / 2
     } else {
       nv = p
@@ -108,9 +107,8 @@ skkm = function(x, nCluster, nStart = 10, s = 1.5, weights = NULL,
 {
   out = list()
   call = match.call()
-  kernel = match.arg(kernel, c("linear", "gaussian", "spline", "spline-t",
-                               "gaussian-2way", "spline-2way", "spline-t-2way", 
-                               "scaled-gaussian", "scaled-gaussian-2way"))
+  kernel = match.arg(kernel, c("linear", "poly", "gaussian", "spline", "spline-t",
+                               "gaussian-2way", "spline-2way", "spline-t-2way"))
   search = match.arg(search, c("exact", "binary"))
   x = as.matrix(x)
   n = nrow(x)
@@ -164,10 +162,14 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
   # p = ncol(x)
   
   # initialization
-  if (kernel %in% c("gaussian", "gaussian-2way", "scaled-gaussian", "scaled-gaussian-2way")) {
+  if (grepl("gaussian", kernel)) {
     make_anovaKernel = anovaKernel.gaussian
-  } else {
-    make_anovaKernel = anovaKernel.others
+  } else if (kernel == "linear") {
+    make_anovaKernel = anovaKernel.linear
+  } else if (kernel == "poly" ) {
+    make_anovaKernel = anovaKernel.poly
+  } else if (grepl("spline", kernel)) {
+    make_anovaKernel = anovaKernel.spline
   }
   
   anovaKernel = make_anovaKernel(x = x, y = x, kernel = kernel, kparam = kparam)
