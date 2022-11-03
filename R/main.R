@@ -166,7 +166,7 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
     make_anovaKernel = anovaKernel.gaussian
   } else if (kernel == "linear") {
     make_anovaKernel = anovaKernel.linear
-  } else if (kernel == "poly" ) {
+  } else if (kernel == "poly") {
     make_anovaKernel = anovaKernel.poly
   } else if (grepl("spline", kernel)) {
     make_anovaKernel = anovaKernel.spline
