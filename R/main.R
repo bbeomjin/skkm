@@ -52,6 +52,7 @@ tune.skkm = function(x, nCluster, nPerms = 20, s = NULL, ns = 100, nStart = 10, 
 
   perm_bcd_list = matrix(0, nrow = nPerms, ncol = nrow(params))
   for (b in 1:nPerms) {
+    cat("Computing the gap statistics :", round(b / nPerms, 2) * 100, "%", "\r")
     perm_bcd = unlist(parallel::mclapply(1:nrow(params), FUN = function(j) {
       perm_fit = skkm(x = perm_list[[b]], nCluster = nCluster, nStart = nStart, s = params$s[j], weights = weights,
                       kernel = kernel, kparam = params$kparam[j], search = search, opt = TRUE, ...)
