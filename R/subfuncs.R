@@ -291,7 +291,7 @@ GetWCD = function(anovaKernel, clusters, weights = NULL)
 }
 
 
-updateCs = function(anovaKernel, theta, clusters, weights, maxiter = 100) {
+updateCs = function(K, clusters, weights, maxiter = 100) {
   
   # Initialization
   clusters0 = clusters
@@ -302,8 +302,6 @@ updateCs = function(anovaKernel, theta, clusters, weights, maxiter = 100) {
       
       ind = clusters0 == g
       swt = weights[ind]
-      
-      K = combine_kernel(anovaKernel, theta = theta)
       
       Kxx = diag(K)
       

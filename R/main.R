@@ -188,12 +188,12 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
   
   if (length(clusters) == 1) {
     nCluster = clusters
+    K0 = combine_kernel(anovaKernel, theta = theta0)
     init_wcd_vec = numeric(nInit)
     init_clusters_list = vector("list", nInit)
     for (i in 1:nInit) {
       clusters0 = sample(1:nCluster, size = n, replace = TRUE)
-      clusters = updateCs(anovaKernel = anovaKernel, theta = theta0, 
-                          clusters = clusters0, weights = weights)$clusters
+      clusters = updateCs(K = K0, clusters = clusters0, weights = weights)$clusters
       init_clusters_list[[i]] = clusters
       wcd = GetWCD(anovaKernel, clusters = clusters, weights = weights)
       init_wcd_vec[i] = sum(theta0 * wcd)
@@ -208,8 +208,7 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
   for (iter in 1:maxiter) {
     
     # Update clusters
-    clusters = updateCs(anovaKernel = anovaKernel, theta = theta0, 
-                        clusters = clusters0, weights = weights)$clusters  
+    clusters = updateCs(K = K0, clusters = clusters0, weights = weights)$clusters  
     # plot(dat$x[, 1:2], col = clusters)
     
     # Update theta
@@ -246,6 +245,7 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
     if ((sum(abs(theta - theta0)) / (sum(theta0) + 1e-12)) < eps) {
       break
     } else {
+      K0 = combine_kernel(anovaKernel, theta = theta)
       theta0 = theta
       clusters0 = clusters
     }
