@@ -98,7 +98,7 @@ kkmeans = function(x, nCluster, nStart = 10, weights = NULL,
       #                            kernel = kernel, kpar = kpar, ...)
       # res[[j]] = kernlab::kkmeans(Kmat$K[[1]], centers = nCluster, ...)
       clusters0 = sample(1:nCluster, size = n, replace = TRUE)
-      res[[j]] = updateCs(K = Kmat$K, clusters = clusters0, weights = weights)
+      res[[j]] = updateCs(K = Kmat$K[[1]], clusters = clusters0, weights = weights)
     })
     if (inherits(try_error, "try-error")) {
       wcd[j] = Inf
