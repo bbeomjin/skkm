@@ -15,7 +15,8 @@ tune.kkmeans = function(x, nCluster, nPerms = 20, nStart = 10, weights = NULL,
   
   x = as.matrix(x)
   n = nrow(x)
-
+  p = ncol(x)
+  
   perm_list = vector("list", nPerms)
   for (i in 1:nPerms) {
     perm_list[[i]] = sapply(1:p, function(j) sample(x[, j, drop = FALSE]))
