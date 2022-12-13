@@ -1,6 +1,6 @@
 kernelMatrix = function(x, y, kernel = "gaussian", kparam = 1.0)
 {
-  kernel = match.arg(kernel, c("linear", "linear(n)", "poly", "gaussian", "spline", "anova_gaussian") )
+  kernel = match.arg(kernel, c("linear", "poly", "gaussian", "spline", "anova_gaussian") )
   x = as.matrix(x)
   y = as.matrix(y)
   p = ncol(x)
@@ -24,10 +24,6 @@ kernelMatrix = function(x, y, kernel = "gaussian", kparam = 1.0)
     # K = kernlab:::kernelMatrix(rbfdot(sigma = kparam), x, y)
   } else if (kernel == "linear") {
     K = tcrossprod(x, y)
-  } else if (kernel == "linear(n)") {
-    K = tcrossprod(x, y)
-    diags = diag(K)
-    K = K / max(diags)
   } else if (kernel == "anova_gaussian") {
     K = 0
     for (d in 1:p) {
@@ -99,14 +95,14 @@ anovaKernel.gaussian = function(x, y, kernel, kparam)
 anovaKernel.linear = function(x, y, kernel, kparam = NULL)
 {
   out = list()
-  kernel = match.arg(kernel, c("linear", "linear(n)"))
+  kernel = match.arg(kernel, c("linear"))
   x = as.matrix(x)
   y = as.matrix(y)
   dimx = ncol(x)
 
   anovaKernel = lapply(1:dimx, function(j) {
                         kernelMatrix(x[, j, drop = FALSE], y[, j, drop = FALSE], 
-                                     kernel = kernel, kparam = NULL)
+                                     kernel = "linear", kparam = NULL)
                       })
   names(anovaKernel) = paste0("x", 1:dimx)
   out$K = anovaKernel
@@ -124,7 +120,7 @@ anovaKernel.poly = function(x, y, kernel, kparam = 1)
 
   anovaKernel = lapply(1:dimx, function(j) {
                         kernelMatrix(x[, j, drop = FALSE], y[, j, drop = FALSE], 
-                                     kernel = kernel, kparam = kparam)
+                                     kernel = "poly", kparam = kparam)
                       })
   names(anovaKernel) = paste0("x", 1:dimx)
   out$K = anovaKernel
