@@ -10,7 +10,7 @@ tune.skkm = function(x, nCluster, nPerms = 20, s = NULL, ns = 100, nStart = 10, 
 {
   out = list()
   call = match.call()
-  kernel = match.arg(kernel, c("linear", "poly", "gaussian", "spline", "spline-t",
+  kernel = match.arg(kernel, c("linear", "linear(n)", "poly", "gaussian", "spline", "spline-t",
                                "gaussian-2way", "spline-2way", "spline-t-2way"))
   search = match.arg(search, c("exact", "binary"))
   if (!is.matrix(x)) {
@@ -110,7 +110,7 @@ skkm = function(x, nCluster, nStart = 10, s = 1.5, weights = NULL,
 {
   out = list()
   call = match.call()
-  kernel = match.arg(kernel, c("linear", "poly", "gaussian", "spline", "spline-t",
+  kernel = match.arg(kernel, c("linear", "linear(n)", "poly", "gaussian", "spline", "spline-t",
                                "gaussian-2way", "spline-2way", "spline-t-2way"))
   search = match.arg(search, c("exact", "binary"))
   x = as.matrix(x)
@@ -167,9 +167,9 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
   # initialization
   if (grepl("gaussian", kernel)) {
     make_anovaKernel = anovaKernel.gaussian
-  } else if (kernel == "linear") {
+  } else if (grepl("linear", kernel)) {
     make_anovaKernel = anovaKernel.linear
-  } else if (kernel == "poly") {
+  } else if (grepl("poly", kernel)) {
     make_anovaKernel = anovaKernel.poly
   } else if (grepl("spline", kernel)) {
     make_anovaKernel = anovaKernel.spline

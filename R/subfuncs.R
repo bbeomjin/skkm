@@ -1,6 +1,6 @@
 kernelMatrix = function(x, y, kernel = "gaussian", kparam = 1.0)
 {
-  kernel = match.arg(kernel, c("linear", "poly", "gaussian", "spline", "anova_gaussian") )
+  kernel = match.arg(kernel, c("linear", "linear(n)", "poly", "gaussian", "spline", "anova_gaussian") )
   x = as.matrix(x)
   y = as.matrix(y)
   p = ncol(x)
@@ -99,14 +99,14 @@ anovaKernel.gaussian = function(x, y, kernel, kparam)
 anovaKernel.linear = function(x, y, kernel, kparam = NULL)
 {
   out = list()
-  kernel = match.arg(kernel, c("linear"))
+  kernel = match.arg(kernel, c("linear", "linear(n)"))
   x = as.matrix(x)
   y = as.matrix(y)
   dimx = ncol(x)
 
   anovaKernel = lapply(1:dimx, function(j) {
                         kernelMatrix(x[, j, drop = FALSE], y[, j, drop = FALSE], 
-                                     kernel = "linear", kparam = NULL)
+                                     kernel = kernel, kparam = NULL)
                       })
   names(anovaKernel) = paste0("x", 1:dimx)
   out$K = anovaKernel
@@ -124,7 +124,7 @@ anovaKernel.poly = function(x, y, kernel, kparam = 1)
 
   anovaKernel = lapply(1:dimx, function(j) {
                         kernelMatrix(x[, j, drop = FALSE], y[, j, drop = FALSE], 
-                                     kernel = "poly", kparam = kparam)
+                                     kernel = kernel, kparam = kparam)
                       })
   names(anovaKernel) = paste0("x", 1:dimx)
   out$K = anovaKernel
