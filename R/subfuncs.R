@@ -27,7 +27,7 @@ kernelMatrix = function(x, y, kernel = "gaussian", kparam = 1.0)
   } else if (kernel == "linear(n)") {
     K = tcrossprod(x, y)
     diags = diag(K)
-    K = K / tcrossprod(sqrt(diags))
+    K = K / max(diags)
   } else if (kernel == "anova_gaussian") {
     K = 0
     for (d in 1:p) {
