@@ -24,6 +24,10 @@ kernelMatrix = function(x, y, kernel = "gaussian", kparam = 1.0)
     # K = kernlab:::kernelMatrix(rbfdot(sigma = kparam), x, y)
   } else if (kernel == "linear") {
     K = tcrossprod(x, y)
+  } else if (kernel == "linear(n)") {
+    K = tcrossprod(x, y)
+    diags = diag(K)
+    K = K / tcrossprod(sqrt(diags))
   } else if (kernel == "anova_gaussian") {
     K = 0
     for (d in 1:p) {
