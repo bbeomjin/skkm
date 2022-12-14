@@ -134,7 +134,7 @@ skkm = function(x, nCluster, nStart = 10, s = 1.5, weights = NULL,
     # fit = kkmeans2(K, centers = nCluster)
     # clusters0 = fit@.Data
     
-    res[[j]] = skkm_core(x = x, clusters = nCluster, theta = NULL, s = s, weights = weights,
+    res[[j]] = skkm_core(x = x, clusters = nCluster, s = s, weights = weights,
                          kernel = kernel, kparam = kparam, search = search, ...)
   }
   if (opt) {
