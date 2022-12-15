@@ -346,10 +346,10 @@ BinarySearch = function(coefs, s)
   if((sum(coefs^2) == 0) | (sum(abs(normalization(coefs))) <= s)) return(0)
   if (s == 1) {return(max(coefs) - 1e-8)}
   lamb1 = 0
-  lamb2 = max(abs(coefs)) - 1e-6
+  lamb2 = max(abs(coefs)) - 1e-5
   iter = 0
   # while ((iter <= 30) & ((lamb2 - lamb1) > 1e-5)) {
-  while ((iter <= 30) & ((lamb2 - lamb1) > 1e-4)) {
+  while ((iter <= 15) & ((lamb2 - lamb1) > 1e-4)) {
     iter = iter + 1
     w_tmp = soft_threshold(coefs, (lamb1 + lamb2) / 2)
     w = normalization(w_tmp)

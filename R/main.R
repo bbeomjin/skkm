@@ -242,7 +242,7 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
     bcd_vec[iter] = sum(theta * bcd)
     
     # print((sum(abs(theta - theta0)) / sum(theta0)))
-    if ((sum(abs(theta - theta0)) / (sum(theta0) + 1e-12)) < eps) {
+    if ((sum(abs(theta - theta0)) / sum(theta0)) < eps) {
       break
     } else {
       K0 = combine_kernel(anovaKernel, theta = theta)
