@@ -176,7 +176,8 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
     make_anovaKernel = anovaKernel.spline
   }
   
-  anovaKernel = make_anovaKernel(x = x, y = x, kernel = kernel, kparam = kparam, normalization = normalization)
+  anovaKernel = make_anovaKernel(x = x, y = x, kernel = kernel, kparam = kparam)
+  kernel_vars = sapply(anovaKernel$K, var.kernelMatrix) 
   theta0 = theta
   
   if (is.null(theta0)) {
@@ -189,7 +190,12 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
   
   if (length(clusters) == 1) {
     nCluster = clusters
-    K0 = combine_kernel(anovaKernel, theta = theta0)
+    if (normalization) {
+      var0 = sum(theta0 * kernel_vars}
+    } else {
+      var0 = 1
+    }
+    K0 = combine_kernel(anovaKernel, theta = theta0) / var0
     init_wcd_vec = numeric(nInit)
     init_clusters_list = vector("list", nInit)
     for (i in 1:nInit) {
@@ -197,7 +203,7 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
       clusters = updateCs(K = K0, clusters = clusters0, weights = weights)$clusters
       init_clusters_list[[i]] = clusters
       wcd = GetWCD(anovaKernel, clusters = clusters, weights = weights)
-      init_wcd_vec[i] = sum(theta0 * wcd)
+      init_wcd_vec[i] = sum(theta0 * wcd / var0)
     }
     init_clusters = clusters0 = init_clusters_list[[which.min(init_wcd_vec)]]
   } else {
@@ -215,22 +221,28 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
     # Update theta
     wcd = GetWCD(anovaKernel, clusters = clusters, weights = weights)
     td = GetWCD(anovaKernel, rep(1, length(clusters)), weights = weights)
-    bcd = td - wcd
+    bcd = td - wcd 
     
     if (search == "exact") {
-      suppressWarnings({delta = ExactSearch(coefs = bcd, s = s)})
+      suppressWarnings({delta = ExactSearch(coefs = bcd / var0, s = s)})
       if (delta == Inf) {
         # browser(); 
         warning("The exact search couldn't find a solution. Use the binary search.")
-        delta = BinarySearch(coefs = bcd, s = s)  
+        delta = BinarySearch(coefs = bcd / var0, s = s)  
       }  
     } else {
-      delta = BinarySearch(coefs = bcd, s = s)
+      delta = BinarySearch(coefs = bcd / var0, s = s)
     }
     
-    theta_tmp = soft_threshold(bcd, delta = delta)
-    theta = normalization(theta_tmp)
+    theta_tmp = soft_threshold(bcd / var0, delta = delta)
+    theta = l2normalization(theta_tmp)
     
+    if (normalization) {
+      var = sum(theta * kernel_vars}
+    } else {
+      var = 1
+    }
+
     # td_new = GetWCD(anovaKernel, rep(1, length(clusters)), weights = weights)
     # wcd_new = GetWCD(anovaKernel, clusters = clusters, weights = weights)
     # sum(theta0 * td) - sum(theta * td)
@@ -238,17 +250,18 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
     # theta * td
     # sum(theta0 * wcd) - sum(theta * wcd)
     
-    td_vec[iter] = sum(theta * td)
-    wcd_vec[iter] = sum(theta * wcd)
-    bcd_vec[iter] = sum(theta * bcd)
+    td_vec[iter] = sum(theta * td / var)
+    wcd_vec[iter] = sum(theta * wcd / var)
+    bcd_vec[iter] = sum(theta * bcd / var)
     
     # print((sum(abs(theta - theta0)) / sum(theta0)))
     if ((sum(abs(theta - theta0)) / sum(theta0)) < eps) {
       break
     } else {
-      K0 = combine_kernel(anovaKernel, theta = theta)
+      K0 = combine_kernel(anovaKernel, theta = theta) / var
       theta0 = theta
       clusters0 = clusters
+      var0 = var
     }
   }
   out$clusters = clusters

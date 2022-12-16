@@ -1,4 +1,4 @@
-kernelMatrix = function(x, y, kernel = "gaussian", kparam = 1.0, normalization = FALSE)
+kernelMatrix = function(x, y, kernel = "gaussian", kparam = 1.0)
 {
   kernel = match.arg(kernel, c("linear", "poly", "gaussian", "spline", "anova_gaussian") )
   x = as.matrix(x)
@@ -30,7 +30,7 @@ kernelMatrix = function(x, y, kernel = "gaussian", kparam = 1.0, normalization =
     for (d in 1:p) {
       A = x[, d, drop = FALSE]
       B = y[, d, drop = FALSE]
-      K_temp = kernelMatrix(A, B, kernel = "gaussian", kparam = kparam, normalization = normalization)
+      K_temp = kernelMatrix(A, B, kernel = "gaussian", kparam = kparam)
       K = K + K_temp
     }
   } else if (kernel == "spline") {
@@ -51,19 +51,11 @@ kernelMatrix = function(x, y, kernel = "gaussian", kparam = 1.0, normalization =
   } else {
     K = NULL
   }
-
-  if (normalization) {
-    n = nrow(K)
-    var = 1 / n * sum(diag(K)) - 1 / n^2 * sum(K)
-    K = K / var
-    attr(K, "var") = var
-  }
   return(K)
 }
 
 
-
-anovaKernel.gaussian = function(x, y, kernel, kparam, normalization = FALSE)
+anovaKernel.gaussian = function(x, y, kernel, kparam)
 {
   out = list()
   kernel = match.arg(kernel, c("gaussian", "gaussian-2way"))
@@ -73,7 +65,7 @@ anovaKernel.gaussian = function(x, y, kernel, kparam, normalization = FALSE)
 
   anovaKernel = lapply(1:dimx, function(j) {
                         kernelMatrix(x[, j, drop = FALSE], y[, j, drop = FALSE], 
-                                     kernel = "gaussian", kparam = kparam, normalization = normalization)
+                                     kernel = "gaussian", kparam = kparam)
                       })
   names(anovaKernel) = paste0("x", 1:dimx)
   numK = dimx
@@ -100,7 +92,7 @@ anovaKernel.gaussian = function(x, y, kernel, kparam, normalization = FALSE)
   return(out)
 }
 
-anovaKernel.linear = function(x, y, kernel, kparam = NULL, normalization = FALSE)
+anovaKernel.linear = function(x, y, kernel, kparam = NULL)
 {
   out = list()
   kernel = match.arg(kernel, c("linear"))
@@ -110,7 +102,7 @@ anovaKernel.linear = function(x, y, kernel, kparam = NULL, normalization = FALSE
 
   anovaKernel = lapply(1:dimx, function(j) {
                         kernelMatrix(x[, j, drop = FALSE], y[, j, drop = FALSE], 
-                                     kernel = "linear", kparam = NULL, normalization = normalization)
+                                     kernel = "linear", kparam = NULL)
                       })
   names(anovaKernel) = paste0("x", 1:dimx)
   out$K = anovaKernel
@@ -118,7 +110,7 @@ anovaKernel.linear = function(x, y, kernel, kparam = NULL, normalization = FALSE
   return(out)
 }
 
-anovaKernel.poly = function(x, y, kernel, kparam = 1, normalization = FALSE)
+anovaKernel.poly = function(x, y, kernel, kparam = 1)
 {
   out = list()
   kernel = match.arg(kernel, c("poly"))
@@ -128,7 +120,7 @@ anovaKernel.poly = function(x, y, kernel, kparam = 1, normalization = FALSE)
 
   anovaKernel = lapply(1:dimx, function(j) {
                         kernelMatrix(x[, j, drop = FALSE], y[, j, drop = FALSE], 
-                                     kernel = "poly", kparam = kparam, normalization = normalization)
+                                     kernel = "poly", kparam = kparam)
                       })
   names(anovaKernel) = paste0("x", 1:dimx)
   out$K = anovaKernel
@@ -137,7 +129,7 @@ anovaKernel.poly = function(x, y, kernel, kparam = 1, normalization = FALSE)
 }
 
 
-anovaKernel.spline = function(x, y, kernel, kparam, normalization = FALSE)
+anovaKernel.spline = function(x, y, kernel, kparam)
 {
   out = list()
   kernel = match.arg(kernel, c("spline", "spline-t", "spline-2way", "spline-t-2way"))
@@ -155,7 +147,7 @@ anovaKernel.spline = function(x, y, kernel, kparam, normalization = FALSE)
       index = index + 1
       A = x[, d, drop = FALSE]
       B = y[, d, drop = FALSE]
-      K_temp = kernelMatrix(A, B, kernel = "spline", normalization = normalization)
+      K_temp = kernelMatrix(A, B, kernel = "spline")
       anova_kernel[[index]] = K_temp$K1
       kernelCoord[[index]] = paste("x", d, " linear", sep="")
       index = index + 1
@@ -173,7 +165,7 @@ anovaKernel.spline = function(x, y, kernel, kparam, normalization = FALSE)
       index = index + 1
       A = x[, d, drop = FALSE]
       B = y[, d, drop = FALSE]
-      K_temp = kernelMatrix(A, B, kernel = "spline", normalization = normalization)
+      K_temp = kernelMatrix(A, B, kernel = "spline")
       anova_kernel[[index]] = K_temp$K1
       kernelCoord[[index]] = paste("x", d, " linear", sep = "")
       index = index + 1
@@ -210,7 +202,7 @@ anovaKernel.spline = function(x, y, kernel, kparam, normalization = FALSE)
       index = index + 1
       A = x[, d, drop = FALSE]
       B = y[, d, drop = FALSE]
-      K_temp = kernelMatrix(A, B, kernel = "spline", normalization = normalization)
+      K_temp = kernelMatrix(A, B, kernel = "spline")
       anova_kernel[[index]] = (K_temp$K1 + K_temp$K2)
       kernelCoord[[index]] = paste("x", d, sep = "")
     }
@@ -224,7 +216,7 @@ anovaKernel.spline = function(x, y, kernel, kparam, normalization = FALSE)
       index = index + 1
       A = x[, d, drop = FALSE]
       B = y[, d, drop = FALSE]
-      K_temp = kernelMatrix(A, B, kernel = "spline", normalization = normalization)
+      K_temp = kernelMatrix(A, B, kernel = "spline")
       anova_kernel[[index]] = (K_temp$K1 + K_temp$K2)
       kernelCoord[[index]] = paste("x", d, sep = "")
     }
@@ -255,6 +247,13 @@ combine_kernel = function(anovaKernel,
   }
   return(K)
 }
+
+var.kernelMatrix = function(K) {
+  n = nrow(K)
+  var = 1 / n * sum(diag(K)) - 1 / n^2 * sum(K)
+  return(var)
+}
+
 
 # make_a_vec = function(anovaKernel, clusters) {
 #   uc = sort(unique(clusters))
@@ -343,14 +342,14 @@ soft_threshold = function(x, delta) {
   return(w)
 }
 
-normalization = function(x) {
+l2normalization = function(x) {
   return(x / sqrt(sum(x^2)))
 }
 
 # the function from sparcl package
 BinarySearch = function(coefs, s) 
 {
-  if((sum(coefs^2) == 0) | (sum(abs(normalization(coefs))) <= s)) return(0)
+  if((sum(coefs^2) == 0) | (sum(abs(l2normalization(coefs))) <= s)) return(0)
   if (s == 1) {return(max(coefs) - 1e-8)}
   lamb1 = 0
   lamb2 = max(abs(coefs)) - 1e-5
@@ -359,7 +358,7 @@ BinarySearch = function(coefs, s)
   while ((iter <= 15) & ((lamb2 - lamb1) > 1e-4)) {
     iter = iter + 1
     w_tmp = soft_threshold(coefs, (lamb1 + lamb2) / 2)
-    w = normalization(w_tmp)
+    w = l2normalization(w_tmp)
     if (sum(abs(w)) < s) {
       lamb2 = (lamb1 + lamb2) / 2
     } else {
@@ -372,7 +371,7 @@ BinarySearch = function(coefs, s)
 # exact search
 ExactSearch = function(coefs, s)
 {
-  if ((sum(coefs^2) == 0) | (sum(abs(normalization(coefs))) <= s)) return(0)
+  if ((sum(coefs^2) == 0) | (sum(abs(l2normalization(coefs))) <= s)) return(0)
   if (s == 1) {return(max(coefs) - 1e-8)}
   p = length(coefs)
   ind_seq = (1:p)[1:p != s^2]
@@ -409,7 +408,7 @@ ExactSearch = function(coefs, s)
 # old version2
 # ExactSearch = function(coefs, s)
 # {
-#   if((sum(coefs^2) == 0) | (sum(abs(normalization(coefs))) <= s)) return(0)
+#   if((sum(coefs^2) == 0) | (sum(abs(l2normalization(coefs))) <= s)) return(0)
 #   p = length(coefs)
 #   ind_seq = (1:p)[1:p != s^2]
 #   sorted_coefs = sort(coefs, decreasing = TRUE)
@@ -434,7 +433,7 @@ ExactSearch = function(coefs, s)
 # old version
 # ExactSearch = function(coefs, s)
 # {
-#   if((sum(coefs^2) == 0) | (sum(abs(normalization(coefs))) <= s)) return(0)
+#   if((sum(coefs^2) == 0) | (sum(abs(l2normalization(coefs))) <= s)) return(0)
 #   p = length(coefs)
 #   ind_seq = (1:p)[1:p != s^2]
 #   sorted_coefs = sort(coefs, decreasing = TRUE)
