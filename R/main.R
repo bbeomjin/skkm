@@ -37,12 +37,15 @@ tune.skkm = function(x, nCluster, nPerms = 20, s = NULL, ns = 100, nStart = 10, 
     perm_list[[i]] = sapply(1:p, function(j) sample(x[, j, drop = FALSE]))
   }
     
-  org_bcd = unlist(parallel::mclapply(1:nrow(params), FUN = function(j) {
+  org_bcd = parallel::mclapply(1:nrow(params), FUN = function(j) {
     org_fit = skkm(x = x, nCluster = nCluster, nStart = nStart, s = params$s[j], weights = weights,
                    kernel = kernel, kparam = params$kparam[j], search = search, opt = TRUE, ...)
-    return(org_fit$maxBcd)
-  }, mc.cores = nCores))
+    return(list(bcd = org_fit$maxBcd, norm_bcd = org_fit$normalized_maxBcd))
+  }, mc.cores = nCores)
   
+  org_norm_bcd = sapply(org_bcd, "[[", "norm_bcd")
+  org_bcd = sapply(org_bcd, "[[", "bcd")
+
   # org_bcd = unlist(parallel::mclapply(s, FUN = function(ss) {
   #   org_fit = skkm(x = x, nCluster = nCluster, nStart = nStart, s = ss, weights = weights,
   #                  kernel = kernel, kparam = kparam, opt = TRUE, ...)
@@ -50,18 +53,20 @@ tune.skkm = function(x, nCluster, nPerms = 20, s = NULL, ns = 100, nStart = 10, 
   # }, mc.cores = nCores))
 
 
-  perm_bcd_list = matrix(0, nrow = nPerms, ncol = nrow(params))
+  perm_bcd_list = perm_norm_bcd_list = matrix(0, nrow = nPerms, ncol = nrow(params))
+  
   for (b in 1:nPerms) {
     if (verbose) {
       cat("Computing the gap statistics :", round(b / nPerms, 2) * 100, "%", "\r")
     }
-    perm_bcd = unlist(parallel::mclapply(1:nrow(params), FUN = function(j) {
+    perm_bcd = parallel::mclapply(1:nrow(params), FUN = function(j) {
       perm_fit = skkm(x = perm_list[[b]], nCluster = nCluster, nStart = nStart, s = params$s[j], weights = weights,
                       kernel = kernel, kparam = params$kparam[j], search = search, opt = TRUE, ...)
-      return(perm_fit$maxBcd)
-    }, mc.cores = nCores))
+      return(list(bcd = perm_fit$maxBcd, norm_bcd = perm_fit$normalized_maxBcd))
+    }, mc.cores = nCores)
    
-    perm_bcd_list[b, ] = perm_bcd
+    perm_norm_bcd_list[b, ] = sapply(perm_bcd, "[[", "norm_bcd")
+    perm_bcd_list[b, ] = sapply(perm_bcd, "[[", "bcd")
   }
 
   # perm_bcd_list = matrix(0, nrow = nPerms, ncol = ns)
@@ -79,22 +84,15 @@ tune.skkm = function(x, nCluster, nPerms = 20, s = NULL, ns = 100, nStart = 10, 
   out$permBcd = perm_bcd_list
   out$gaps = log(org_bcd) - colMeans(log(perm_bcd_list))
   out$optInd = min(which(out$gaps == max(out$gaps)))
-  # out$opt_s = s[out$optInd]
   out$opt_s = params[out$optInd, "s"]
   out$opt_kparam = params[out$optInd, "kparam"]
-    
+  out$orgNormBcd = org_norm_bcd
+  out$permNormBcd = perm_norm_bcd_list
   if (opt) {
     opt_fit = skkm(x = x, nCluster = nCluster, nStart = nStart, s = out$opt_s, weights = weights,
                   kernel = kernel, kparam = out$opt_kparam, search = search, opt = TRUE, ...)  
     out$optModel = opt_fit
   }
-  
-  # if (opt) {
-  #   opt_fit = skkm(x = x, nCluster = nCluster, nStart = nStart, s = out$opt_s, weights = weights,
-  #                 kernel = kernel, kparam = kparam, opt = TRUE, ...)  
-  #   out$optModel = opt_fit
-  # }
-
   out$call = call
   return(out)
 }
@@ -138,10 +136,9 @@ skkm = function(x, nCluster, nStart = 10, s = 1.5, weights = NULL,
                          kernel = kernel, kparam = kparam, search = search, ...)
   }
   if (opt) {
-    bcd_list = sapply(res, function(x) {
-      bcd = max(x$bcd)
-    })
-    
+    bcd_list = sapply(res, function(x) {max(x$bcd)})
+    normalized_bcd_list = sapply(res, function(x) {x$normalized_bcd})
+
     optInd = which(bcd_list == max(bcd_list))
     if (length(optInd) > 1) {
       warning("")
@@ -151,14 +148,14 @@ skkm = function(x, nCluster, nStart = 10, s = 1.5, weights = NULL,
     out$optClusters = res[[optInd]]$clusters
     out$optTheta = res[[optInd]]$theta
     out$maxBcd = bcd_list[optInd]
+    out$normalized_maxBcd = normalized_bcd_list[optInd]
   }
   out$res = res
   return(out)
 }
 
 skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weights = NULL,
-                     kernel = "linear", kparam = 1, normalization = FALSE, search = "exact",
-                     maxiter = 100, eps = 1e-8) 
+                     kernel = "linear", kparam = 1, search = "exact", maxiter = 100, eps = 1e-8) 
 {
   out = list()
   call = match.call()
@@ -190,12 +187,7 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
   
   if (length(clusters) == 1) {
     nCluster = clusters
-    if (normalization) {
-      var0 = sum(theta0 * kernel_vars)
-    } else {
-      var0 = 1
-    }
-    K0 = combine_kernel(anovaKernel, theta = theta0) / var0
+    K0 = combine_kernel(anovaKernel, theta = theta0)
     init_wcd_vec = numeric(nInit)
     init_clusters_list = vector("list", nInit)
     for (i in 1:nInit) {
@@ -203,7 +195,7 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
       clusters = updateCs(K = K0, clusters = clusters0, weights = weights)$clusters
       init_clusters_list[[i]] = clusters
       wcd = GetWCD(anovaKernel, clusters = clusters, weights = weights)
-      init_wcd_vec[i] = sum(theta0 * wcd / var0)
+      init_wcd_vec[i] = sum(theta0 * wcd)
     }
     init_clusters = clusters0 = init_clusters_list[[which.min(init_wcd_vec)]]
   } else {
@@ -224,52 +216,41 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
     bcd = td - wcd 
     
     if (search == "exact") {
-      suppressWarnings({delta = ExactSearch(coefs = bcd / var0, s = s)})
+      suppressWarnings({delta = ExactSearch(coefs = bcd, s = s)})
       if (delta == Inf) {
         # browser(); 
         warning("The exact search couldn't find a solution. Use the binary search.")
-        delta = BinarySearch(coefs = bcd / var0, s = s)  
+        delta = BinarySearch(coefs = bcd, s = s)  
       }  
     } else {
-      delta = BinarySearch(coefs = bcd / var0, s = s)
+      delta = BinarySearch(coefs = bcd, s = s)
     }
     
-    theta_tmp = soft_threshold(bcd / var0, delta = delta)
+    theta_tmp = soft_threshold(bcd, delta = delta)
     theta = l2normalization(theta_tmp)
     
-    if (normalization) {
-      var = sum(theta * kernel_vars)
-    } else {
-      var = 1
-    }
-
-    # td_new = GetWCD(anovaKernel, rep(1, length(clusters)), weights = weights)
-    # wcd_new = GetWCD(anovaKernel, clusters = clusters, weights = weights)
-    # sum(theta0 * td) - sum(theta * td)
-    # theta0 * td
-    # theta * td
-    # sum(theta0 * wcd) - sum(theta * wcd)
+    td_vec[iter] = sum(theta * td)
+    wcd_vec[iter] = sum(theta * wcd)
+    bcd_vec[iter] = sum(theta * bcd)
     
-    td_vec[iter] = sum(theta * td / var)
-    wcd_vec[iter] = sum(theta * wcd / var)
-    bcd_vec[iter] = sum(theta * bcd / var)
-    
-    # print((sum(abs(theta - theta0)) / sum(theta0)))
     if ((sum(abs(theta - theta0)) / sum(theta0)) < eps) {
       break
     } else {
-      K0 = combine_kernel(anovaKernel, theta = theta) / var
+      K0 = combine_kernel(anovaKernel, theta = theta)
       theta0 = theta
       clusters0 = clusters
-      var0 = var
     }
   }
+  var = sum(theta * kernel_vars)
   out$clusters = clusters
   out$theta = theta
   out$weights = weights
   out$td = td_vec
   out$wcd = wcd_vec
   out$bcd = bcd_vec
+  out$normalized_td = td_vec[iter] / var
+  out$normalized_wcd = wcd_vec[iter] / var
+  out$normalized_bcd = bcd_vec[iter] / var
   out$init_clusters = init_clusters
   out$iteration = iter
   return(out)
