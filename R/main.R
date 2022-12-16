@@ -191,7 +191,7 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
   if (length(clusters) == 1) {
     nCluster = clusters
     if (normalization) {
-      var0 = sum(theta0 * kernel_vars}
+      var0 = sum(theta0 * kernel_vars)
     } else {
       var0 = 1
     }
@@ -238,7 +238,7 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
     theta = l2normalization(theta_tmp)
     
     if (normalization) {
-      var = sum(theta * kernel_vars}
+      var = sum(theta * kernel_vars)
     } else {
       var = 1
     }
