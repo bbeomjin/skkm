@@ -1,4 +1,4 @@
-kernelMatrix = function(x, y, kernel = "gaussian", kparam = 1.0)
+kernelMatrix = function(x, y, kernel = "gaussian", kparam = 1.0, normalization = FALSE)
 {
   kernel = match.arg(kernel, c("linear", "poly", "gaussian", "spline", "anova_gaussian") )
   x = as.matrix(x)
@@ -30,7 +30,7 @@ kernelMatrix = function(x, y, kernel = "gaussian", kparam = 1.0)
     for (d in 1:p) {
       A = x[, d, drop = FALSE]
       B = y[, d, drop = FALSE]
-      K_temp = kernelMatrix(A, B, kernel = "gaussian", kparam = kparam)
+      K_temp = kernelMatrix(A, B, kernel = "gaussian", kparam = kparam, normalization = normalization)
       K = K + K_temp
     }
   } else if (kernel == "spline") {
@@ -51,12 +51,19 @@ kernelMatrix = function(x, y, kernel = "gaussian", kparam = 1.0)
   } else {
     K = NULL
   }
+
+  if (normalization) {
+    n = nrow(K)
+    var = 1 / n * sum(diag(K)) - 1 / n^2 * sum(K)
+    K = K / var
+    attr(K, "var") = var
+  }
   return(K)
 }
 
 
 
-anovaKernel.gaussian = function(x, y, kernel, kparam)
+anovaKernel.gaussian = function(x, y, kernel, kparam, normalization = FALSE)
 {
   out = list()
   kernel = match.arg(kernel, c("gaussian", "gaussian-2way"))
@@ -66,7 +73,7 @@ anovaKernel.gaussian = function(x, y, kernel, kparam)
 
   anovaKernel = lapply(1:dimx, function(j) {
                         kernelMatrix(x[, j, drop = FALSE], y[, j, drop = FALSE], 
-                                     kernel = "gaussian", kparam = kparam)
+                                     kernel = "gaussian", kparam = kparam, normalization = normalization)
                       })
   names(anovaKernel) = paste0("x", 1:dimx)
   numK = dimx
@@ -93,7 +100,7 @@ anovaKernel.gaussian = function(x, y, kernel, kparam)
   return(out)
 }
 
-anovaKernel.linear = function(x, y, kernel, kparam = NULL)
+anovaKernel.linear = function(x, y, kernel, kparam = NULL, normalization = FALSE)
 {
   out = list()
   kernel = match.arg(kernel, c("linear"))
@@ -103,7 +110,7 @@ anovaKernel.linear = function(x, y, kernel, kparam = NULL)
 
   anovaKernel = lapply(1:dimx, function(j) {
                         kernelMatrix(x[, j, drop = FALSE], y[, j, drop = FALSE], 
-                                     kernel = "linear", kparam = NULL)
+                                     kernel = "linear", kparam = NULL, normalization = normalization)
                       })
   names(anovaKernel) = paste0("x", 1:dimx)
   out$K = anovaKernel
@@ -111,7 +118,7 @@ anovaKernel.linear = function(x, y, kernel, kparam = NULL)
   return(out)
 }
 
-anovaKernel.poly = function(x, y, kernel, kparam = 1)
+anovaKernel.poly = function(x, y, kernel, kparam = 1, normalization = FALSE)
 {
   out = list()
   kernel = match.arg(kernel, c("poly"))
@@ -121,7 +128,7 @@ anovaKernel.poly = function(x, y, kernel, kparam = 1)
 
   anovaKernel = lapply(1:dimx, function(j) {
                         kernelMatrix(x[, j, drop = FALSE], y[, j, drop = FALSE], 
-                                     kernel = "poly", kparam = kparam)
+                                     kernel = "poly", kparam = kparam, normalization = normalization)
                       })
   names(anovaKernel) = paste0("x", 1:dimx)
   out$K = anovaKernel
@@ -130,7 +137,7 @@ anovaKernel.poly = function(x, y, kernel, kparam = 1)
 }
 
 
-anovaKernel.spline = function(x, y, kernel, kparam)
+anovaKernel.spline = function(x, y, kernel, kparam, normalization = FALSE)
 {
   out = list()
   kernel = match.arg(kernel, c("spline", "spline-t", "spline-2way", "spline-t-2way"))
@@ -148,7 +155,7 @@ anovaKernel.spline = function(x, y, kernel, kparam)
       index = index + 1
       A = x[, d, drop = FALSE]
       B = y[, d, drop = FALSE]
-      K_temp = kernelMatrix(A, B, kernel = "spline")
+      K_temp = kernelMatrix(A, B, kernel = "spline", normalization = normalization)
       anova_kernel[[index]] = K_temp$K1
       kernelCoord[[index]] = paste("x", d, " linear", sep="")
       index = index + 1
@@ -166,7 +173,7 @@ anovaKernel.spline = function(x, y, kernel, kparam)
       index = index + 1
       A = x[, d, drop = FALSE]
       B = y[, d, drop = FALSE]
-      K_temp = kernelMatrix(A, B, kernel = "spline")
+      K_temp = kernelMatrix(A, B, kernel = "spline", normalization = normalization)
       anova_kernel[[index]] = K_temp$K1
       kernelCoord[[index]] = paste("x", d, " linear", sep = "")
       index = index + 1
@@ -203,7 +210,7 @@ anovaKernel.spline = function(x, y, kernel, kparam)
       index = index + 1
       A = x[, d, drop = FALSE]
       B = y[, d, drop = FALSE]
-      K_temp = kernelMatrix(A, B, kernel = "spline")
+      K_temp = kernelMatrix(A, B, kernel = "spline", normalization = normalization)
       anova_kernel[[index]] = (K_temp$K1 + K_temp$K2)
       kernelCoord[[index]] = paste("x", d, sep = "")
     }
@@ -217,7 +224,7 @@ anovaKernel.spline = function(x, y, kernel, kparam)
       index = index + 1
       A = x[, d, drop = FALSE]
       B = y[, d, drop = FALSE]
-      K_temp = kernelMatrix(A, B, kernel = "spline")
+      K_temp = kernelMatrix(A, B, kernel = "spline", normalization = normalization)
       anova_kernel[[index]] = (K_temp$K1 + K_temp$K2)
       kernelCoord[[index]] = paste("x", d, sep = "")
     }
