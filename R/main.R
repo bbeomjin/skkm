@@ -83,9 +83,11 @@ tune.skkm = function(x, nCluster, nPerms = 20, s = NULL, ns = 100, nStart = 10, 
   out$orgBcd = org_bcd
   out$permBcd = perm_bcd_list
   out$gaps = log(org_bcd) - colMeans(log(perm_bcd_list))
+  out$gapsSd = apply(log(perm_bcd_list), 2, sd)
   out$optInd = min(which(out$gaps == max(out$gaps)))
   out$opt_s = params[out$optInd, "s"]
   out$opt_kparam = params[out$optInd, "kparam"]
+  out$params = params
   out$orgNormBcd = org_norm_bcd
   out$permNormBcd = perm_norm_bcd_list
   if (opt) {
