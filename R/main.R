@@ -176,6 +176,7 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
   }
   
   anovaKernel = make_anovaKernel(x = x, y = x, kernel = kernel, kparam = kparam)
+  anovaKernel = normalization.anovaKernel(anovaKernel)
   kernel_vars = sapply(anovaKernel$K, var.kernelMatrix) 
   theta0 = theta
   
