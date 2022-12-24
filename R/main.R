@@ -157,7 +157,8 @@ skkm = function(x, nCluster, nStart = 10, s = 1.5, weights = NULL,
 }
 
 skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weights = NULL,
-                     kernel = "linear", kparam = 1, search = "exact", maxiter = 100, eps = 1e-8) 
+                     kernel = "linear", kparam = 1, search = "exact", normalization = FALSE,
+                     maxiter = 100, eps = 1e-8) 
 {
   out = list()
   call = match.call()
@@ -176,6 +177,11 @@ skkm_core = function(x, clusters = NULL, nInit = 20, theta = NULL, s = 1.5, weig
   }
   
   anovaKernel = make_anovaKernel(x = x, y = x, kernel = kernel, kparam = kparam)
+  
+  if (normalization) {
+    anovaKernel = normalization.anovaKernel(anovaKernel)
+  }
+  
   kernel_vars = sapply(anovaKernel$K, var.kernelMatrix) 
   theta0 = theta
   
