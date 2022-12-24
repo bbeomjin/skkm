@@ -254,6 +254,14 @@ var.kernelMatrix = function(K) {
   return(var)
 }
 
+normalization.anovaKernel = function(anovaKernel)
+{
+  vars = sapply(anovaKernel$K, var.kernelMatrix)
+  anovaKernel$K = lapply(1:anovaKernel$numK, function(k) {
+    return(anovaKernel$K[[k]] / vars[k])
+  })
+  return(anovaKernel)
+}
 
 # make_a_vec = function(anovaKernel, clusters) {
 #   uc = sort(unique(clusters))
